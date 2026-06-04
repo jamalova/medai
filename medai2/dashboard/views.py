@@ -141,14 +141,22 @@ def api_logs(request):
 # ===========================================================
 
 def _build_search_index():
-    """xlsx fayldan indeks yaratadi."""
+    """Demo data bilan indeks yaratadi."""
     if search_engine._is_built:
         return
-
-    xlsx_path = os.path.join(
-        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-        'data', 'data.xlsx'
-    )
+    demo_docs = [
+        (1, "Cardiology heart disease treatment clinical study patients"),
+        (2, "Oncology cancer tumor treatment chemotherapy radiation"),
+        (3, "Neurology brain stroke neural disorder treatment"),
+        (4, "Pediatrics children disease vaccination growth"),
+        (5, "Immunology immune system antibody infection virus"),
+        (6, "yurak kasalligi davolash kardiologiya"),
+        (7, "saraton onkologiya kimyoterapiya"),
+        (8, "nevrologiya miya insult davolash"),
+    ]
+    for doc_id, text in demo_docs:
+        search_engine.index_document(doc_id, text)
+    search_engine._is_built = True
     
     from .search_engine import load_xlsx_to_engine
     res = load_xlsx_to_engine(search_engine, xlsx_path)
