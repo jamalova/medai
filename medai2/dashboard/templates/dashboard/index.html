@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MEDAI — Clinical Intelligence</title>
+  {% load static %}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'dashboard/css/style.css' %}">
+</head>
+
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo">
+      <span class="logo-mark">MEDAI</span>
+      <span class="logo-sub">CLINICAL INTELLIGENCE</span>
+    </div>
+    <nav class="nav">
+      <a href="{% url 'dashboard' %}" class="nav-item {% if active_page == 'dashboard' %}active{% endif %}">
+        <svg viewBox="0 0 24 24">
+          <rect x="3" y="3" width="7" height="7" rx="1" />
+          <rect x="14" y="3" width="7" height="7" rx="1" />
+          <rect x="3" y="14" width="7" height="7" rx="1" />
+          <rect x="14" y="14" width="7" height="7" rx="1" />
+        </svg>
+        Dashboard
+      </a>
+      <a href="{% url 'classifier' %}" class="nav-item {% if active_page == 'classifier' %}active{% endif %}">
+        <svg viewBox="0 0 24 24">
+          <path d="M4 6h16M4 12h10M4 18h13" />
+        </svg>
+        Article Classifier
+      </a>
+      <a href="{% url 'datasets' %}" class="nav-item {% if active_page == 'datasets' %}active{% endif %}">
+        <svg viewBox="0 0 24 24">
+          <ellipse cx="12" cy="5" rx="9" ry="3" />
+          <path d="M21 12c0 1.66-4 3-9 3S3 13.66 3 12" />
+          <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+        </svg>
+        My Datasets
+      </a>
+      <a href="{% url 'analytics' %}" class="nav-item {% if active_page == 'analytics' %}active{% endif %}">
+        <svg viewBox="0 0 24 24">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+        </svg>
+        Analytics
+      </a>
+    </nav>
+    <a href="#" class="new-analysis-btn">
+      <svg viewBox="0 0 24 24">
+        <line x1="12" y1="5" x2="12" y2="19" />
+        <line x1="5" y1="12" x2="19" y2="12" />
+      </svg>
+      New Analysis
+    </a>
+    <div class="sidebar-footer">
+      <a href="#" class="nav-item-sm">
+        <svg viewBox="0 0 24 24">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <polyline points="14 2 14 8 20 8" />
+        </svg>
+        Documentation
+      </a>
+      <a href="#" class="nav-item-sm">
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="3" />
+          <path d="M19.07 4.93A10 10 0 0 0 12 2a10 10 0 0 0-7.07 2.93" />
+          <path d="M4.93 19.07A10 10 0 0 0 12 22a10 10 0 0 0 7.07-2.93" />
+        </svg>
+        Settings
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="search-wrap" style="position:relative;">
+        <svg class="search-icon" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+        <input type="text" id="globalSearch" placeholder="Search datasets or articles..." class="search-input"
+          autocomplete="off">
+        <select id="searchModel"
+          style="margin-left:8px;padding:6px 10px;border-radius:8px;border:1px solid #333;background:#1a1a2e;color:#fff;font-size:13px;">
+          <option value="bm25">BM25</option>
+          <option value="tfidf">TF-IDF</option>
+        </select>
+
+        <!-- Natijalar oynasi -->
+        <div id="searchResults" style="
+    display:none;
+    position:absolute;
+    top:110%;
+    left:0;
+    width:600px;
+    max-height:400px;
+    overflow-y:auto;
+    background:#1a1a2e;
+    border:1px solid #2a2a4a;
+    border-radius:12px;
+    box-shadow:0 8px 32px rgba(0,0,0,0.5);
+    z-index:9999;
+    padding:12px;
+  ">
+          <div id="searchResultsInner"></div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button class="icon-btn">
+          <svg viewBox="0 0 24 24">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+          </svg>
+        </button>
+        <button class="icon-btn">
+          <svg viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+          </svg>
+        </button>
+        <div class="user-info">
+          <div>
+            <div class="user-name">M.Z.Jamalova</div>
+            <div class="user-role">CLINICAL LEAD</div>
+          </div>
+          <div class="user-avatar">AT</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+      <!-- BREADCRUMB -->
+      <div class="breadcrumb">
+        <span>Datasets</span>
+        <svg viewBox="0 0 24 24">
+          <polyline points="9 18 15 12 9 6" />
+        </svg>
+        <span class="bc-active">Oncology Research 2024</span>
+      </div>
+
+      <!-- PAGE HEADER -->
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Dataset Statistics</h1>
+          <p class="page-sub">Detailed breakdown and health metrics for the clinical classification model.</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn-outline">
+            <svg viewBox="0 0 24 24">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            Export Report
+          </button>
+          <button class="btn-primary">
+            <svg viewBox="0 0 24 24">
+              <polyline points="23 4 23 10 17 10" />
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+            </svg>
+            Retrain Model
+          </button>
+        </div>
+      </div>
+
+      <!-- STAT CARDS -->
+      {% if metrics %}
+      <div class="stat-cards">
+        <div class="stat-card">
+          <div class="stat-label">
+            TOTAL ARTICLES
+            <svg class="stat-icon blue" viewBox="0 0 24 24">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+            </svg>
+          </div>
+          <div class="stat-value">{{ metrics.total_articles|default:"5,412" }}</div>
+          <div class="stat-trend up">↑ +12% from last upload</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">
+            MODEL ACCURACY
+            <svg class="stat-icon green" viewBox="0 0 24 24">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <polyline points="22 4 12 14.01 9 11.01" />
+            </svg>
+          </div>
+          <div class="stat-value">{{ metrics.model_accuracy }}%</div>
+          <div class="stat-sub">F1-Score: {{ metrics.f1_score }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">
+            CATEGORIES
+            <svg class="stat-icon purple" viewBox="0 0 24 24">
+              <polygon points="12 2 2 7 12 12 22 7 12 2" />
+              <polyline points="2 17 12 22 22 17" />
+              <polyline points="2 12 12 17 22 12" />
+            </svg>
+          </div>
+          <div class="stat-value">{{ total_categories|default:"18" }}</div>
+          <div class="stat-sub">Active Taxonomies</div>
+        </div>
+        <div class="stat-card highlight-card">
+          <div class="stat-label">
+            AI CONFIDENCE
+            <span class="dot-pulse"></span>
+          </div>
+          <div class="stat-value-lg">{{ metrics.ai_confidence|default:"High" }}</div>
+          <div class="stat-sub">Stable across domains</div>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- MIDDLE ROW -->
+      <div class="mid-row">
+
+        <!-- LABEL DISTRIBUTION -->
+        <div class="card dist-card">
+          <div class="card-header">
+            <h2 class="card-title">Label Distribution</h2>
+            <div class="toggle-group">
+              <button class="toggle active">Frequency</button>
+              <button class="toggle">Prevalence</button>
+            </div>
+          </div>
+
+          <div class="dist-list">
+            {% for cat in categories %}
+            <div class="dist-item">
+              <div class="dist-meta">
+                <span class="dist-name">{{ cat.name }}</span>
+                <span class="dist-count">{{ cat.article_count }} articles ({{ cat.percentage }}%)</span>
+              </div>
+              <div class="dist-bar-track">
+                <div class="dist-bar" style="width: {{ cat.percentage }}%; background: {{ cat.color }};"></div>
+              </div>
+            </div>
+            {% empty %}
+            <p class="empty-msg">No categories found.</p>
+            {% endfor %}
+          </div>
+
+          <!-- METRICS ROW -->
+          {% if metrics %}
+          <div class="metrics-row">
+            <div class="metric-box">
+              <div class="metric-lbl">COHESION</div>
+              <div class="metric-val">{{ metrics.cohesion }}</div>
+            </div>
+            <div class="metric-box">
+              <div class="metric-lbl">OVERLAP</div>
+              <div class="metric-val">{{ metrics.overlap }}%</div>
+            </div>
+            <div class="metric-box">
+              <div class="metric-lbl">ENTROPY</div>
+              <div class="metric-val">{{ metrics.entropy }}</div>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- RIGHT COLUMN -->
+        <div class="right-col">
+
+          <!-- SOURCE METADATA -->
+          <div class="card meta-card">
+            <div class="card-header">
+              <svg class="card-icon" viewBox="0 0 24 24">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+              </svg>
+              <h2 class="card-title">Source Metadata</h2>
+            </div>
+            {% if dataset %}
+            <div class="file-badge">
+              <span class="file-icon">XLSX</span>
+              <div>
+                <div class="file-name">{{ dataset.name }}</div>
+                <div class="file-date">Added {{ dataset.days_ago }} days ago by {{ dataset.uploaded_by }}</div>
+              </div>
+            </div>
+            <table class="meta-table">
+              <tr>
+                <td>File Size</td>
+                <td>{{ dataset.file_size_mb }} MB</td>
+              </tr>
+              <tr>
+                <td>Row Count</td>
+                <td>{{ dataset.row_count }}</td>
+              </tr>
+              <tr>
+                <td>Columns</td>
+                <td>{{ dataset.columns }} Identified</td>
+              </tr>
+              <tr>
+                <td>Data Type</td>
+                <td>{{ dataset.data_type }}</td>
+              </tr>
+              <tr>
+                <td>Character Set</td>
+                <td>{{ dataset.character_set }}</td>
+              </tr>
+            </table>
+            {% endif %}
+            <a href="#" class="link-blue">View Full Schema Mapping</a>
+          </div>
+
+          <!-- AI INSIGHT -->
+          <div class="card insight-card">
+            <div class="insight-header">
+              <div class="insight-icon">
+                <svg viewBox="0 0 24 24">
+                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                </svg>
+              </div>
+              <span class="insight-badge">AI INSIGHT</span>
+            </div>
+            <h3 class="insight-title">Category Imbalance Detected</h3>
+            <p class="insight-text">"Immunology" and "Rare Diseases" are under-represented. The model may show reduced
+              accuracy for these domains. Consider synthetic data augmentation.</p>
+            <button class="btn-insight">Apply Augmentation</button>
+          </div>
+
+        </div>
+      </div>
+
+    <!-- PROCESSING LOGS -->
+    <div class="card logs-card">
+      <!-- ... existing logs ... -->
+    </div>
+
+    <!-- IR ANALYTICS SECTION -->
+    <div class="card ir-analytics-card">
+      <div class="card-header">
+        <h2 class="card-title">Information Retrieval (IR) Analytics</h2>
+        <span class="status-badge verified">Real-time Data</span>
+      </div>
+
+      <div class="tabs-header">
+        <button class="tab-btn active" onclick="switchTab(event, 'tab-search')">Search & Ranking</button>
+        <button class="tab-btn" onclick="switchTab(event, 'tab-tokens')">Token Frequencies</button>
+        <button class="tab-btn" onclick="switchTab(event, 'tab-inverted')">Inverted Index</button>
+        <button class="tab-btn" onclick="switchTab(event, 'tab-slots')">Slot Extraction</button>
+      </div>
+
+      <!-- Tab: Search -->
+      <div id="tab-search" class="tab-content active">
+        <div style="margin-bottom: 20px;">
+          <div style="display:flex; gap:10px; margin-bottom:15px;">
+            <input type="text" id="irSearchInput" placeholder="Enter query (e.g. gormon, hujayra)..." class="search-input"
+              style="flex:1; width:auto;">
+            <button class="btn-primary" onclick="performIRSearch()">Perform IR Search</button>
+          </div>
+          <div id="irSearchResults" style="min-height: 100px;">
+            <p class="empty-msg">Perform a search to see ranked results from both BM25 and TF-IDF models.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Tokens -->
+      <div id="tab-tokens" class="tab-content">
+        <div style="max-height: 500px; overflow-y: auto;">
+          <table class="ir-table">
+            <thead>
+              <tr>
+                <th>Token</th>
+                <th>Frequency</th>
+                <th>Doc Count</th>
+                <th>Importance</th>
+              </tr>
+            </thead>
+            <tbody id="tokens-tbody">
+              <!-- Populated via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab: Inverted Index -->
+      <div id="tab-inverted" class="tab-content">
+        <div style="max-height: 500px; overflow-y: auto;">
+          <table class="ir-table">
+            <thead>
+              <tr>
+                <th>Token</th>
+                <th>Associated Documents (IDs)</th>
+              </tr>
+            </thead>
+            <tbody id="inverted-tbody">
+              <!-- Populated via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab: Slot Extraction -->
+      <div id="tab-slots" class="tab-content">
+        <div style="max-height: 500px; overflow-y: auto;">
+          <table class="ir-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Original Text</th>
+                <th>Semantic Slots</th>
+              </tr>
+            </thead>
+            <tbody id="slots-tbody">
+              <!-- Populated via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    </div>
+  </main>
+
+  <script src="{% static 'dashboard/js/main.js' %}"></script>
+  <script>
+    (function () {
+      const input = document.getElementById('globalSearch');
+      const model = document.getElementById('searchModel');
+      const box = document.getElementById('searchResults');
+      const inner = document.getElementById('searchResultsInner');
+      let timer = null;
+
+      input.addEventListener('input', function () {
+        clearTimeout(timer);
+        const q = this.value.trim();
+
+        if (!q) { box.style.display = 'none'; return; }
+
+        inner.innerHTML = '<p style="color:#888;padding:8px;">Qidirilmoqda...</p>';
+        box.style.display = 'block';
+
+        timer = setTimeout(() => {
+          fetch(`/api/search/?q=${encodeURIComponent(q)}&model=${model.value}&top_k=10`)
+            .then(r => r.json())
+            .then(data => {
+              if (!data.results || data.results.length === 0) {
+                inner.innerHTML = '<p style="color:#888;padding:8px;">Natija topilmadi</p>';
+                return;
+              }
+
+              inner.innerHTML = `
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #2a2a4a;">
+              <span style="color:#888;font-size:12px;">"${data.query}" — ${data.total} ta natija</span>
+              <span style="color:#4a9eff;font-size:11px;font-weight:600;">${data.model}</span>
+            </div>
+            ${data.results.map(r => `
+              <div style="padding:10px;margin-bottom:6px;border-radius:8px;background:#12122a;border-left:3px solid #4a9eff;">
+                <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                  <span style="color:#fff;font-size:13px;font-weight:500;">ID: ${r.doc_id}</span>
+                  <span style="color:#2ec27e;font-size:12px;">Score: ${r.score}</span>
+                </div>
+                <div style="color:#aaa;font-size:12px;line-height:1.5;">
+                  ${r.text.length > 120 ? r.text.substring(0, 120) + '...' : r.text}
+                </div>
+              </div>
+            `).join('')}
+          `;
+            })
+            .catch(() => {
+              inner.innerHTML = '<p style="color:#e74c3c;padding:8px;">Xato yuz berdi</p>';
+            });
+        }, 400);
+      });
+
+      // Tashqariga bosganda yopiladi
+      document.addEventListener('click', function (e) {
+        if (!e.target.closest('.search-wrap')) {
+          box.style.display = 'none';
+        }
+      });
+    })();
+  </script>
+</body>
+
+</html>
